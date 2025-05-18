@@ -22,19 +22,20 @@
 #include "cJSON.h"
 
 #define MAX_INPUT 512
+#define MAX_DRILLS 64
 
 void run_drill(const char *description, const char *expected_command) {
     char input[MAX_INPUT];
     int correct_count = 0;
 
-    while (correct_count < 10) {
+    while (correct_count < 5) {
         printf("%s\n> ", description);
         if (!fgets(input, sizeof(input), stdin)) break;
         input[strcspn(input, "\n")] = 0;
 
         if (strcmp(input, expected_command) == 0) {
             correct_count++;
-            printf("Correct (%d/10)\n", correct_count);
+            printf("Correct (%d/5)\n", correct_count);
         } else {
             printf("Incorrect. Try again.\n");
         }
@@ -64,9 +65,40 @@ int main() {
         return 1;
     }
 
-    int count = cJSON_GetArraySize(root);
-    for (int i = 0; i < count; i++) {
-        cJSON *item = cJSON_GetArrayItem(root, i);
+    int total_categories = cJSON_GetArraySize(root);
+    cJSON *categories[MAX_DRILLS];
+    const char *category_names[MAX_DRILLS];
+    int category_count = 0;
+
+    cJSON *entry = NULL;
+    cJSON_ArrayForEach(entry, root) {
+        if (category_count >= MAX_DRILLS) break;
+        category_names[category_count] = entry->string;
+        categories[category_count] = entry;
+        category_count++;
+    }
+
+    printf("Drills Available:\n");
+    for (int i = 0; i < category_count; i++) {
+        printf("%d) %s\n", i + 1, category_names[i]);
+    }
+
+    printf("Select a drill by number: ");
+    int selection = 0;
+    scanf("%d", &selection);
+    getchar(); // flush newline
+
+    if (selection < 1 || selection > category_count) {
+        printf("Invalid selection.\n");
+        cJSON_Delete(root);
+        free(data);
+        return 1;
+    }
+
+    cJSON *drill_array = categories[selection - 1];
+    int drill_count = cJSON_GetArraySize(drill_array);
+    for (int i = 0; i < drill_count; i++) {
+        cJSON *item = cJSON_GetArrayItem(drill_array, i);
         const char *desc = cJSON_GetObjectItem(item, "description")->valuestring;
         const char *cmd = cJSON_GetObjectItem(item, "command")->valuestring;
         run_drill(desc, cmd);
