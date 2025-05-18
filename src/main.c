@@ -15,7 +15,6 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/>.
 //
 // Contact: mcc_gh@abine.org
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +23,7 @@
 #define MAX_INPUT 512
 #define MAX_DRILLS 64
 
-void run_drill(const char *description, const char *expected_command) {
+void run_drill(const char *description, const char *expected_command, const char *explanation) {
     char input[MAX_INPUT];
     int correct_count = 0;
 
@@ -35,6 +34,14 @@ void run_drill(const char *description, const char *expected_command) {
 
         if (strcmp(input, "showit") == 0) {
             printf("Expected command: %s\n", expected_command);
+            continue;
+        }
+
+        if (strcmp(input, "expit") == 0) {
+            if (explanation != NULL)
+                printf("Explanation: %s\n", explanation);
+            else
+                printf("No explanation provided.\n");
             continue;
         }
 
@@ -107,7 +114,9 @@ int main() {
             cJSON *item = cJSON_GetArrayItem(drill_array, i);
             const char *desc = cJSON_GetObjectItem(item, "description")->valuestring;
             const char *cmd = cJSON_GetObjectItem(item, "command")->valuestring;
-            run_drill(desc, cmd);
+            cJSON *exp_obj = cJSON_GetObjectItem(item, "explanation");
+            const char *exp = (exp_obj && cJSON_IsString(exp_obj)) ? exp_obj->valuestring : NULL;
+            run_drill(desc, cmd, exp);
         }
     }
 
