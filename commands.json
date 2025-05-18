@@ -1,0 +1,11 @@
+[
+  {
+    "description": "Show current directory",
+    "command": "pwd"
+  },
+  {
+    "description": "List all files including hidden ones",
+    "command": "ls -a"
+  }
+]
+
