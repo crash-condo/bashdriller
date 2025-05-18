@@ -70,7 +70,6 @@ int main() {
         return 1;
     }
 
-    int total_categories = cJSON_GetArraySize(root);
     cJSON *categories[MAX_DRILLS];
     const char *category_names[MAX_DRILLS];
     int category_count = 0;
@@ -83,30 +82,33 @@ int main() {
         category_count++;
     }
 
-    printf("Drills Available:\n");
-    for (int i = 0; i < category_count; i++) {
-        printf("%d) %s\n", i + 1, category_names[i]);
-    }
+    while (1) {
+        printf("\nDrills Available:\n");
+        for (int i = 0; i < category_count; i++) {
+            printf("%d) %s\n", i + 1, category_names[i]);
+        }
+        printf("0) Quit\n");
 
-    printf("Select a drill by number: ");
-    int selection = 0;
-    scanf("%d", &selection);
-    getchar(); // flush newline
+        printf("Select a drill by number: ");
+        int selection = 0;
+        scanf("%d", &selection);
+        getchar(); // flush newline
 
-    if (selection < 1 || selection > category_count) {
-        printf("Invalid selection.\n");
-        cJSON_Delete(root);
-        free(data);
-        return 1;
-    }
+        if (selection == 0) break;
 
-    cJSON *drill_array = categories[selection - 1];
-    int drill_count = cJSON_GetArraySize(drill_array);
-    for (int i = 0; i < drill_count; i++) {
-        cJSON *item = cJSON_GetArrayItem(drill_array, i);
-        const char *desc = cJSON_GetObjectItem(item, "description")->valuestring;
-        const char *cmd = cJSON_GetObjectItem(item, "command")->valuestring;
-        run_drill(desc, cmd);
+        if (selection < 1 || selection > category_count) {
+            printf("Invalid selection.\n");
+            continue;
+        }
+
+        cJSON *drill_array = categories[selection - 1];
+        int drill_count = cJSON_GetArraySize(drill_array);
+        for (int i = 0; i < drill_count; i++) {
+            cJSON *item = cJSON_GetArrayItem(drill_array, i);
+            const char *desc = cJSON_GetObjectItem(item, "description")->valuestring;
+            const char *cmd = cJSON_GetObjectItem(item, "command")->valuestring;
+            run_drill(desc, cmd);
+        }
     }
 
     cJSON_Delete(root);
