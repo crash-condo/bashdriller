@@ -33,6 +33,11 @@ void run_drill(const char *description, const char *expected_command) {
         if (!fgets(input, sizeof(input), stdin)) break;
         input[strcspn(input, "\n")] = 0;
 
+        if (strcmp(input, "showit") == 0) {
+            printf("Expected command: %s\n", expected_command);
+            continue;
+        }
+
         if (strcmp(input, expected_command) == 0) {
             correct_count++;
             printf("Correct (%d/5)\n", correct_count);
