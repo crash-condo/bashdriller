@@ -23,7 +23,12 @@
 #define MAX_INPUT 512
 #define MAX_DRILLS 64
 
-void run_drill(const char *description, const char *expected_command, const char *explanation) {
+// Return codes
+#define CONTINUE_DRILL 0
+#define SKIP_TO_NEXT   1
+#define RETURN_TO_MENU 2
+
+int run_drill(const char *description, const char *expected_command, const char *explanation) {
     char input[MAX_INPUT];
     int correct_count = 0;
 
@@ -45,6 +50,16 @@ void run_drill(const char *description, const char *expected_command, const char
             continue;
         }
 
+        if (strcmp(input, "next") == 0) {
+            printf("Skipping to next drill.\n");
+            return SKIP_TO_NEXT;
+        }
+
+        if (strcmp(input, "quit") == 0) {
+            printf("Returning to main menu.\n");
+            return RETURN_TO_MENU;
+        }
+
         if (strcmp(input, expected_command) == 0) {
             correct_count++;
             printf("Correct (%d/5)\n", correct_count);
@@ -52,6 +67,8 @@ void run_drill(const char *description, const char *expected_command, const char
             printf("Incorrect. Try again.\n");
         }
     }
+
+    return CONTINUE_DRILL;
 }
 
 int main() {
@@ -110,13 +127,17 @@ int main() {
 
         cJSON *drill_array = categories[selection - 1];
         int drill_count = cJSON_GetArraySize(drill_array);
+
         for (int i = 0; i < drill_count; i++) {
             cJSON *item = cJSON_GetArrayItem(drill_array, i);
             const char *desc = cJSON_GetObjectItem(item, "description")->valuestring;
             const char *cmd = cJSON_GetObjectItem(item, "command")->valuestring;
             cJSON *exp_obj = cJSON_GetObjectItem(item, "explanation");
             const char *exp = (exp_obj && cJSON_IsString(exp_obj)) ? exp_obj->valuestring : NULL;
-            run_drill(desc, cmd, exp);
+
+            int result = run_drill(desc, cmd, exp);
+            if (result == RETURN_TO_MENU) break;
+            // SKIP_TO_NEXT falls through
         }
     }
 
