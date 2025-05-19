@@ -60,7 +60,7 @@ bashdriller: malformed entry in /etc/bashdriller/<file> (entry <n>)
 
 1. Build the binary:
    ```bash
-   gcc -o bashdriller src/main.c src/cJSON.c
+   gcc -o bashdriller src/main.c
    ```
 
 2. Move the binary:
