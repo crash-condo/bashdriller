@@ -62,36 +62,75 @@ int parse_drill_file(const char *filepath, DrillSet *set) {
 
     int index = -1;
     char line[INPUT_BUF];
+    DrillItem current = {0};
+    int fields_set = 0;
+
     while (fgets(line, sizeof(line), fp)) {
+        // New entry begins
         if (line[0] == '(' && isdigit(line[1])) {
+            if (fields_set == 5 && index >= 0) {
+                set->items[index] = current;
+            } else if (index >= 0) {
+                log_error(filepath, index + 1);
+            }
+            memset(&current, 0, sizeof(DrillItem));
+            fields_set = 0;
             index++;
             if (index >= MAX_ENTRIES) break;
             continue;
         }
-        char *key = strtok(line, "=");
-        char *value = strtok(NULL, "\n");
 
-        if (!key || !value || key[0] != '"' || value[0] != ' ') {
+        // Skip non-kv lines
+        char *eq = strchr(line, '=');
+        if (!eq) continue;
+        *eq = '\0';
+
+        char *key = line;
+        char *val = eq + 1;
+
+        // Trim whitespace
+        while (*val == ' ' || *val == '\t') val++;
+        size_t len = strlen(val);
+        while (len > 0 && (val[len - 1] == '\n' || val[len - 1] == '\r')) val[--len] = '\0';
+
+        if (val[0] != '"' || val[len - 1] != '"') {
             log_error(filepath, index + 1);
             continue;
         }
 
-        value++; // skip space before opening quote
-        if (strncmp(key, "\"description\"", 13) == 0)
-            strncpy(set->items[index].description, value + 1, INPUT_BUF - 1);
-        else if (strncmp(key, "\"expected command\"", 18) == 0)
-            strncpy(set->items[index].command, value + 1, INPUT_BUF - 1);
-        else if (strncmp(key, "\"explanation\"", 13) == 0)
-            strncpy(set->items[index].explanation, value + 1, INPUT_BUF - 1);
-        else if (strncmp(key, "\"reference\"", 11) == 0)
-            strncpy(set->items[index].reference, value + 1, INPUT_BUF - 1);
-        else if (strncmp(key, "\"tags\"", 6) == 0)
-            strncpy(set->items[index].tags, value + 1, INPUT_BUF - 1);
+        val[len - 1] = '\0';
+        val = val + 1;  // skip leading quote
+
+        if (strcmp(key, "desc") == 0) {
+            strncpy(current.description, val, INPUT_BUF - 1);
+            fields_set++;
+        } else if (strcmp(key, "exp_comm") == 0) {
+            strncpy(current.command, val, INPUT_BUF - 1);
+            fields_set++;
+        } else if (strcmp(key, "expl") == 0) {
+            strncpy(current.explanation, val, INPUT_BUF - 1);
+            fields_set++;
+        } else if (strcmp(key, "ref") == 0) {
+            strncpy(current.reference, val, INPUT_BUF - 1);
+            fields_set++;
+        } else if (strcmp(key, "tags") == 0) {
+            strncpy(current.tags, val, INPUT_BUF - 1);
+            fields_set++;
+        }
     }
-    fclose(fp);
+
+    // Save final block if complete
+    if (fields_set == 5 && index >= 0) {
+        set->items[index] = current;
+    } else if (index >= 0) {
+        log_error(filepath, index + 1);
+    }
+
     set->count = index + 1;
+    fclose(fp);
     return 1;
 }
+
 
 int run_drill(const DrillItem *item) {
     int correct = 0;
