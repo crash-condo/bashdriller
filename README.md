@@ -12,22 +12,21 @@
 
 ## .drill Format
 
-Each `.drill` file must live in `/etc/bashdriller/` and be named using the pattern `name.drill` (e.g., `dmesg.drill`). Files must use the following format:
+Each `.drill` file must live in `/etc/bashdriller/` and be named using the pattern `name.drill` (e.g., `ls.drill`). Files must use the following format:
 
 ```
 (1)
-"description"= "Prompt shown to user"
-"expected command"= "Command the user must enter"
-"explanation"= "What the command does"
-"reference"= "Optional URL or source"
-"tags"= "space-separated tags"
-
+desc="List all files including hidden ones"
+exp_comm="ls -a"
+expl="Lists all files including those starting with a dot"
+ref=""
+tags="ls hidden dotfiles"
 (2)
-"description"= "Next prompt"
-"expected command"= "Next command"
-"explanation"= "Explanation of next command"
-"reference"= ""
-"tags"= ""
+desc="List files in long format"
+exp_comm="ls -l"
+expl="Displays file details including permissions, owner, size, and timestamp"
+ref=""
+tags="ls long format permissions"
 ```
 
 Fields must appear in this exact order. No blank lines are required between blocks. Entries are numbered to define order.
