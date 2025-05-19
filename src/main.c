@@ -22,6 +22,7 @@
 
 #define MAX_INPUT 512
 #define MAX_DRILLS 64
+#define CONFIG_PATH "/etc/bashdriller/commands.json"
 
 // Return codes
 #define CONTINUE_DRILL 0
@@ -72,9 +73,9 @@ int run_drill(const char *description, const char *expected_command, const char 
 }
 
 int main() {
-    FILE *file = fopen("commands.json", "r");
+    FILE *file = fopen(CONFIG_PATH, "r");
     if (!file) {
-        perror("Failed to open commands.json");
+        perror("Failed to open " CONFIG_PATH);
         return 1;
     }
 
@@ -137,7 +138,6 @@ int main() {
 
             int result = run_drill(desc, cmd, exp);
             if (result == RETURN_TO_MENU) break;
-            // SKIP_TO_NEXT falls through
         }
     }
 
