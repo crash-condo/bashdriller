@@ -1,6 +1,6 @@
 # BashDriller v2.0
 
-**BashDriller** is a command-line training utility for practicing Linux commands via repetition-based drills. Version 2.0 introduces modular `.drill` files for defining drills by category.
+**BashDriller** is a command-line training utility for practicing Linux commands via repetition based drills. Version 2.0 introduces modular `.drill` files for defining drills by category.
 
 ## Features
 
