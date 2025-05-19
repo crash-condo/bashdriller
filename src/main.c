@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include <errno.h>
 
-#define MAX_INPUT 512
+#define INPUT_BUF 512
 #define MAX_ENTRIES 256
 #define DRILL_PATH "/etc/bashdriller/"
 #define DRILL_EXT ".drill"
@@ -33,11 +33,11 @@
 #define RETURN_TO_MENU 2
 
 typedef struct {
-    char description[MAX_INPUT];
-    char command[MAX_INPUT];
-    char explanation[MAX_INPUT];
-    char reference[MAX_INPUT];
-    char tags[MAX_INPUT];
+    char description[INPUT_BUF];
+    char command[INPUT_BUF];
+    char explanation[INPUT_BUF];
+    char reference[INPUT_BUF];
+    char tags[INPUT_BUF];
 } DrillItem;
 
 typedef struct {
@@ -61,7 +61,7 @@ int parse_drill_file(const char *filepath, DrillSet *set) {
     if (!fp) return 0;
 
     int index = -1;
-    char line[MAX_INPUT];
+    char line[INPUT_BUF];
     while (fgets(line, sizeof(line), fp)) {
         if (line[0] == '(' && isdigit(line[1])) {
             index++;
@@ -78,15 +78,15 @@ int parse_drill_file(const char *filepath, DrillSet *set) {
 
         value++; // skip space before opening quote
         if (strncmp(key, "\"description\"", 13) == 0)
-            strncpy(set->items[index].description, value + 1, MAX_INPUT - 1);
+            strncpy(set->items[index].description, value + 1, INPUT_BUF - 1);
         else if (strncmp(key, "\"expected command\"", 18) == 0)
-            strncpy(set->items[index].command, value + 1, MAX_INPUT - 1);
+            strncpy(set->items[index].command, value + 1, INPUT_BUF - 1);
         else if (strncmp(key, "\"explanation\"", 13) == 0)
-            strncpy(set->items[index].explanation, value + 1, MAX_INPUT - 1);
+            strncpy(set->items[index].explanation, value + 1, INPUT_BUF - 1);
         else if (strncmp(key, "\"reference\"", 11) == 0)
-            strncpy(set->items[index].reference, value + 1, MAX_INPUT - 1);
+            strncpy(set->items[index].reference, value + 1, INPUT_BUF - 1);
         else if (strncmp(key, "\"tags\"", 6) == 0)
-            strncpy(set->items[index].tags, value + 1, MAX_INPUT - 1);
+            strncpy(set->items[index].tags, value + 1, INPUT_BUF - 1);
     }
     fclose(fp);
     set->count = index + 1;
@@ -95,7 +95,7 @@ int parse_drill_file(const char *filepath, DrillSet *set) {
 
 int run_drill(const DrillItem *item) {
     int correct = 0;
-    char input[MAX_INPUT];
+    char input[INPUT_BUF];
 
     while (correct < 5) {
         printf("%s\n> ", item->description);
